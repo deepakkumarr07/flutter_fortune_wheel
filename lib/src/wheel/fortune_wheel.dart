@@ -105,7 +105,7 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
   final Stream<int> selected;
   final bool animationStartEnd;
   final void Function(int)? onchanged;
-  final Widget spinBorder;
+  final Widget? spinBorder;
 
   /// {@macro flutter_fortune_wheel.FortuneWidget.rotationCount}
   final int rotationCount;
@@ -160,7 +160,7 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
   FortuneWheel( {
     Key? key,
     required this.items,
-    required this.spinBorder,
+     this.spinBorder,
     this.rotationCount = FortuneWidget.kDefaultRotationCount,
     this.selected = const Stream<int>.empty(),
     this.duration = FortuneWidget.kDefaultDuration,
@@ -171,9 +171,9 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
     this.onAnimationStart,
     this.onAnimationEnd,
     this.onchanged,
-    required this.animationStartEnd,
-    required this.height,
-    required this.width,
+     required this.animationStartEnd,
+     this.height=400,
+     this.width=400,
     this.alignment = Alignment.topCenter,
     PanPhysics? physics,
     this.onFling,
@@ -271,11 +271,12 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
                     );
                   });
                 },
-              ),
+              ),  
             ),
+            if(spinBorder!=null)
              Container(
-                    width: width+40,
-          height: height+40,
+              width: width+40,
+              height: height+40,
               child: AnimatedBuilder(
                 animation: rotateAnim,
                 builder: (context, _) {
@@ -291,7 +292,7 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
                     return SizedBox.expand(
                       child:  Transform.rotate(
                       angle: rotationAngle,
-                      child: spinBorder,
+                      child: spinBorder ?? Container(),
                       ),
                     );
                   });
