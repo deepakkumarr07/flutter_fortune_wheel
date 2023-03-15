@@ -105,9 +105,12 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
   final Stream<int> selected;
   final bool animationStartEnd;
   final void Function(int)? onchanged;
+  final Widget spinBorder;
 
   /// {@macro flutter_fortune_wheel.FortuneWidget.rotationCount}
   final int rotationCount;
+  final double height;
+  final double width;
 
   /// {@macro flutter_fortune_wheel.FortuneWidget.duration}
   final Duration duration;
@@ -154,9 +157,10 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
   /// See also:
   ///  * [FortuneBar], which provides an alternative visualization.
   /// {@endtemplate}
-  FortuneWheel({
+  FortuneWheel( {
     Key? key,
     required this.items,
+    required this.spinBorder,
     this.rotationCount = FortuneWidget.kDefaultRotationCount,
     this.selected = const Stream<int>.empty(),
     this.duration = FortuneWidget.kDefaultDuration,
@@ -168,6 +172,8 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
     this.onAnimationEnd,
     this.onchanged,
     required this.animationStartEnd,
+    required this.height,
+    required this.width,
     this.alignment = Alignment.topCenter,
     PanPhysics? physics,
     this.onFling,
@@ -215,52 +221,82 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
       onFling: onFling,
       builder: (context, panState) {
         return Stack(
+          alignment: Alignment.center,
           children: [
-            AnimatedBuilder(
-              animation: rotateAnim,
-              builder: (context, _) {
-                final size = MediaQuery.of(context).size;
-                final meanSize = (size.width + size.height) / 2;
-                final panFactor = 6 / meanSize;
+            Container(
+              width: width,
+              height: height,
+              child: AnimatedBuilder(
+                animation: rotateAnim,
+                builder: (context, _) {
+                  final size = MediaQuery.of(context).size;
+                  final meanSize = (size.width + size.height) / 2;
+                  final panFactor = 6 / meanSize;
 
-                return LayoutBuilder(builder: (context, constraints) {
-                  final wheelData = _WheelData(
-                    constraints: constraints,
-                    itemCount: items.length,
-                    textDirection: Directionality.of(context),
-                  );
+                  return LayoutBuilder(builder: (context, constraints) {
+                    final wheelData = _WheelData(
+                      constraints: constraints,
+                      itemCount: items.length,
+                      textDirection: Directionality.of(context),
+                    );
 
-                  final isAnimatingPanFactor =
-                      rotateAnimCtrl.isAnimating ? 0 : 1;
-                  final selectedAngle =
-                      -2 * _math.pi * (selectedIndex.value / items.length);
-                  final panAngle =
-                      panState.distance * panFactor * isAnimatingPanFactor;
-                  final rotationAngle = _getAngle(rotateAnim.value);
-                  final alignmentOffset = _calculateAlignmentOffset(alignment);
+                    final isAnimatingPanFactor =
+                        rotateAnimCtrl.isAnimating ? 0 : 1;
+                    final selectedAngle =
+                        -2 * _math.pi * (selectedIndex.value / items.length);
+                    final panAngle =
+                        panState.distance * panFactor * isAnimatingPanFactor;
+                    final rotationAngle = _getAngle(rotateAnim.value);
+                    final alignmentOffset = _calculateAlignmentOffset(alignment);
 
-                  final transformedItems = [
-                    for (var i = 0; i < items.length; i++)
-                      TransformedFortuneItem(
-                        item: items[i],
-                        angle: selectedAngle +
-                            panAngle +
-                            rotationAngle +
-                            alignmentOffset +
-                            _calculateSliceAngle(i, items.length),
-                        offset: wheelData.offset,
+                    final transformedItems = [
+                      for (var i = 0; i < items.length; i++)
+                        TransformedFortuneItem(
+                          item: items[i],
+                          angle: selectedAngle +
+                              panAngle +
+                              rotationAngle +
+                              alignmentOffset +
+                              _calculateSliceAngle(i, items.length),
+                          offset: wheelData.offset,
+                        ),
+                    ];
+
+                    return SizedBox.expand(
+                      child: _CircleSlices(
+                            items: transformedItems,
+                            wheelData: wheelData,
+                            styleStrategy: styleStrategy,
+                          ),
+                    );
+                  });
+                },
+              ),
+            ),
+             Container(
+                    width: width+40,
+          height: height+40,
+              child: AnimatedBuilder(
+                animation: rotateAnim,
+                builder: (context, _) {
+                  final size = MediaQuery.of(context).size;
+                  final meanSize = (size.width + size.height) / 2;
+                  final panFactor = 6 / meanSize;
+
+                  return LayoutBuilder(builder: (context, constraints) {
+                    final isAnimatingPanFactor =
+                        rotateAnimCtrl.isAnimating ? 0 : 1;
+                        panState.distance * panFactor * isAnimatingPanFactor;
+                    final rotationAngle = _getAngle(rotateAnim.value);
+                    return SizedBox.expand(
+                      child:  Transform.rotate(
+                      angle: rotationAngle,
+                      child: spinBorder,
                       ),
-                  ];
-
-                  return SizedBox.expand(
-                    child: _CircleSlices(
-                      items: transformedItems,
-                      wheelData: wheelData,
-                      styleStrategy: styleStrategy,
-                    ),
-                  );
-                });
-              },
+                    );
+                  });
+                },
+              ),
             ),
             for (var it in indicators)
               IgnorePointer(
