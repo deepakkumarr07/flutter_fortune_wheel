@@ -157,10 +157,10 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
   /// See also:
   ///  * [FortuneBar], which provides an alternative visualization.
   /// {@endtemplate}
-  FortuneWheel( {
+  FortuneWheel({
     Key? key,
     required this.items,
-     this.spinBorder,
+    this.spinBorder,
     this.rotationCount = FortuneWidget.kDefaultRotationCount,
     this.selected = const Stream<int>.empty(),
     this.duration = FortuneWidget.kDefaultDuration,
@@ -171,9 +171,9 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
     this.onAnimationStart,
     this.onAnimationEnd,
     this.onchanged,
-     required this.animationStartEnd,
-     this.height=400,
-     this.width=400,
+    required this.animationStartEnd,
+    this.height = 400,
+    this.width = 400,
     this.alignment = Alignment.topCenter,
     PanPhysics? physics,
     this.onFling,
@@ -194,7 +194,6 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
 
       await Future.microtask(() => onAnimationStart?.call());
       await rotateAnimCtrl.forward(from: 0).whenComplete(() {
-        print('SELECTEDINDEX.VALUE: ${selectedIndex.value}');
         onchanged!(selectedIndex.value);
       });
       await Future.microtask(() => onAnimationEnd?.call());
@@ -205,7 +204,7 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
         if (animateFirst) animate();
         return null;
       }, []);
-      selectedIndex = useState<int>(0);
+
       useEffect(() {
         final subscription = selected.listen((event) {
           selectedIndex.value = event;
@@ -247,7 +246,8 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
                     final panAngle =
                         panState.distance * panFactor * isAnimatingPanFactor;
                     final rotationAngle = _getAngle(rotateAnim.value);
-                    final alignmentOffset = _calculateAlignmentOffset(alignment);
+                    final alignmentOffset =
+                        _calculateAlignmentOffset(alignment);
 
                     final transformedItems = [
                       for (var i = 0; i < items.length; i++)
@@ -264,41 +264,41 @@ class FortuneWheel extends HookWidget implements FortuneWidget {
 
                     return SizedBox.expand(
                       child: _CircleSlices(
-                            items: transformedItems,
-                            wheelData: wheelData,
-                            styleStrategy: styleStrategy,
-                          ),
-                    );
-                  });
-                },
-              ),  
-            ),
-            if(spinBorder!=null)
-             Container(
-              width: width+40,
-              height: height+40,
-              child: AnimatedBuilder(
-                animation: rotateAnim,
-                builder: (context, _) {
-                  final size = MediaQuery.of(context).size;
-                  final meanSize = (size.width + size.height) / 2;
-                  final panFactor = 6 / meanSize;
-
-                  return LayoutBuilder(builder: (context, constraints) {
-                    final isAnimatingPanFactor =
-                        rotateAnimCtrl.isAnimating ? 0 : 1;
-                        panState.distance * panFactor * isAnimatingPanFactor;
-                    final rotationAngle = _getAngle(rotateAnim.value);
-                    return SizedBox.expand(
-                      child:  Transform.rotate(
-                      angle: rotationAngle,
-                      child: spinBorder ?? Container(),
+                        items: transformedItems,
+                        wheelData: wheelData,
+                        styleStrategy: styleStrategy,
                       ),
                     );
                   });
                 },
               ),
             ),
+            if (spinBorder != null)
+              Container(
+                width: width + 40,
+                height: height + 40,
+                child: AnimatedBuilder(
+                  animation: rotateAnim,
+                  builder: (context, _) {
+                    final size = MediaQuery.of(context).size;
+                    final meanSize = (size.width + size.height) / 2;
+                    final panFactor = 6 / meanSize;
+
+                    return LayoutBuilder(builder: (context, constraints) {
+                      final isAnimatingPanFactor =
+                          rotateAnimCtrl.isAnimating ? 0 : 1;
+                      panState.distance * panFactor * isAnimatingPanFactor;
+                      final rotationAngle = _getAngle(rotateAnim.value);
+                      return SizedBox.expand(
+                        child: Transform.rotate(
+                          angle: rotationAngle,
+                          child: spinBorder ?? Container(),
+                        ),
+                      );
+                    });
+                  },
+                ),
+              ),
             for (var it in indicators)
               IgnorePointer(
                 child: _WheelIndicator(indicator: it),
